@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_buildings
+    columns:
+      - name: building_id
+        tests: [not_null, unique]
+
+  - name: stg_rooms
+    columns:
+      - name: room_id
+        tests: [not_null, unique]
+      - name: building_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_buildings')
+              field: building_id
+      - name: num_beds
+        tests: [not_null]
+
+  - name: stg_students
+    columns:
+      - name: student_id
+        tests: [not_null, unique]
+
+  - name: stg_assignments
+    columns:
+      - name: assignment_id
+        tests: [not_null, unique]
+      - name: student_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_students')
+              field: student_id
+      - name: room_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_rooms')
+              field: room_id
