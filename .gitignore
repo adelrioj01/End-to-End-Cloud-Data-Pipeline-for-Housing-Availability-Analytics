@@ -9,83 +9,26 @@ Thumbs.db
 *.swp
 *.swo
 
-#######################################
-# Python / Conda / Jupyter
-#######################################
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.egg-info/
-.eggs/
-build/
-dist/
-.venv/
-venv/
-env/
-ENV/
-.ipynb_checkpoints/
-.pytest_cache/
-.mypy_cache/
-
-#######################################
-# Node / JS (por si usas scripts)
-#######################################
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-#######################################
-# dbt
-#######################################
-target/
-dbt_packages/
-logs/
-.venv_dbt/
-.DBT_USER*
-.DBT_ENV_SECRET*
-
-#######################################
-# Terraform (CRÍTICO)
-#######################################
-**/.terraform/*
+# Terraform
+.terraform/
 *.tfstate
 *.tfstate.*
-crash.log
-crash.*.log
-
-# Variables (NO subir, puede tener IDs/rutas/keys)
+.terraform.lock.hcl
 *.tfvars
 *.tfvars.json
 
-# CLI config (si existiera)
-.terraformrc
-terraform.rc
-
-#######################################
-# Google Cloud / Credenciales / Secrets (CRÍTICO)
-#######################################
-**/application_default_credentials.json
-**/*service-account*.json
-**/*service_account*.json
-**/*sa-key*.json
-**/*gcp*.json
-*.pem
-*.key
-*.p12
-*.pfx
-*.crt
-*.cer
-*.env
+# Credenciales / secretos
+*.json
+.env
 .env.*
-secrets/
-secret/
-credentials/
-creds/
+*.key
+*.pem
 
-#######################################
+# dbt
+target/
+dbt_packages/
+logs/
+
 # Logs genéricos
 #######################################
 *.log
