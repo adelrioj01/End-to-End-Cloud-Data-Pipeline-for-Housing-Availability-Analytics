@@ -1,0 +1,10 @@
+housing_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: your-gcp-project-id
+      dataset: housing_dev
+      keyfile: /ruta/a/tu/service_account.json
+      threads: 4
