@@ -1,0 +1,10 @@
+housing_analytics:
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: housing-analytics-dev
+      dataset: housing_analytics
+      threads: 4
+      location: US
+  target: dev

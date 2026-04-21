@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: housing_raw
+    database: housing-analytics-dev
+    schema: housing_raw
+    tables:
+      - name: raw_buildings
+      - name: raw_rooms
+      - name: raw_students
+      - name: raw_assignments
