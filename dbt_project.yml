@@ -1,0 +1,25 @@
+name: 'end_to_end_cloud_data_pipeline_for_housing_availability_analytics'
+version: '1.0.0'
+config-version: 2
+profile: 'housing_analytics'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  end_to_end_cloud_data_pipeline_for_housing_availability_analytics:
+    staging:
+      materialized: view
+    intermediate:
+      materialized: table
+    marts:
+      materialized: view

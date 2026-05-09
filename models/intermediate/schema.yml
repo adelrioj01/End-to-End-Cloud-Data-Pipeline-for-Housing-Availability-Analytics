@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: int_assignments_enhanced
+    columns:
+      - name: assignment_id
+        tests: [not_null, unique]
+      - name: student_id
+        tests: [not_null]
+      - name: student_name
+        tests: [not_null]
+      - name: wants_ac
+      - name: wants_dining
+      - name: wants_kitchen
+      - name: wants_private_bathroom
+      - name: room_id
+        tests: [not_null]
+      - name: building_id
+        tests: [not_null]
+      - name: room_number
+        tests: [not_null]
+      - name: num_beds
+        tests: [not_null]
+      - name: has_private_bathroom
+      - name: has_kitchen
+      - name: building_name
+        tests: [not_null]
+      - name: address
+      - name: has_ac
+      - name: has_dining
+      - name: assigned_at
+      - name: _ingested_at
+
+  - name: int_room_occupancy
+    columns:
+      - name: building_id
+        tests: [not_null]
+      - name: building_name
+        tests: [not_null]
+      - name: address
+      - name: room_id
+        tests: [not_null, unique]
+      - name: room_number
+        tests: [not_null]
+      - name: num_beds
+        tests: [not_null]
+      - name: has_private_bathroom
+      - name: has_kitchen
+      - name: current_occupancy
+        tests: [not_null]
+      - name: available_beds
+        tests: [not_null]
+      - name: occupancy_rate

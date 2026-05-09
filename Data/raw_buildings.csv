@@ -1,0 +1,4 @@
+building_id,name,address,has_ac,has_dining
+1,Oak Hall,123 College Ave,TRUE,TRUE
+2,Maple Hall,456 Campus Rd,FALSE,TRUE
+3,Pine Hall,789 University Blvd,TRUE,FALSE

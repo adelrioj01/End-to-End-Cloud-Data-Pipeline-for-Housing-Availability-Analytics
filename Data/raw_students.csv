@@ -1,0 +1,4 @@
+student_id,name,wants_ac,wants_dining,wants_kitchen,wants_private_bathroom
+1,Alice Johnson,TRUE,TRUE,TRUE,TRUE
+2,Bob Smith,FALSE,TRUE,TRUE,FALSE
+3,Charlie Kim,TRUE,FALSE,FALSE,TRUE
