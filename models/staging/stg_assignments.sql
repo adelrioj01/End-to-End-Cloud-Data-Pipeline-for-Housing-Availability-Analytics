@@ -14,7 +14,6 @@ select
   cast(assigned_at as timestamp) as assigned_at,
   cast(_ingested_at as timestamp) as _ingested_at,
 
-  -- Id útil para depurar/cargar incrementales
   to_hex(md5(concat(
     cast(student_id as string), '|',
     cast(building_id as string), '|',
