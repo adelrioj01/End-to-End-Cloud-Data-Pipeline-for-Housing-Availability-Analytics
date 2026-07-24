@@ -84,5 +84,8 @@ The entire project is fully reproducible.
 ### Infrastructure
 ```bash
 cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your real values
 terraform init
 terraform apply
+```

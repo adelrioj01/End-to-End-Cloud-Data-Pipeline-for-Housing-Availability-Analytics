@@ -13,3 +13,4 @@ housing analytics pipeline.
 terraform init
 terraform plan
 terraform apply
+```
