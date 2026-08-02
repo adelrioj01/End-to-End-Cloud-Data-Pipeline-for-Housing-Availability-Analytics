@@ -1,4 +1,4 @@
-student_id,name,wants_ac,wants_dining,wants_kitchen,wants_private_bathroom
-1,Alice Johnson,TRUE,TRUE,TRUE,TRUE
-2,Bob Smith,FALSE,TRUE,TRUE,FALSE
-3,Charlie Kim,TRUE,FALSE,FALSE,TRUE
+student_id,name,wants_ac,wants_dining,wants_kitchen,wants_private_bathroom,_ingested_at
+1,Alice Johnson,TRUE,TRUE,TRUE,TRUE,2026-08-01T00:00:00Z
+2,Bob Smith,FALSE,TRUE,TRUE,FALSE,2026-08-01T00:00:00Z
+3,Charlie Kim,TRUE,FALSE,FALSE,TRUE,2026-08-01T00:00:00Z

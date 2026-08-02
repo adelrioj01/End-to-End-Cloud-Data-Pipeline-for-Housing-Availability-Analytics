@@ -22,6 +22,14 @@ DBT_ENV = {
     'BQ_LOCATION': BQ_LOCATION,
 }
 
+CSV_LOAD_OPTIONS = {
+    'source_format': 'CSV',
+    'skip_leading_rows': 1,
+    'field_delimiter': ',',
+    'encoding': 'UTF-8',
+    'max_bad_records': 0,
+}
+
 # Project directory - get parent of dags folder
 PROJECT_DIR = str(Path(__file__).parent.parent)
 
@@ -94,6 +102,7 @@ load_assignments_to_bq = GCSToBigQueryOperator(
         {'name': 'assigned_at', 'type': 'TIMESTAMP'},
         {'name': '_ingested_at', 'type': 'TIMESTAMP'},
     ],
+    **CSV_LOAD_OPTIONS,
     write_disposition='WRITE_TRUNCATE',
     gcp_conn_id='google_cloud_default',
     dag=dag,
@@ -112,6 +121,7 @@ load_buildings_to_bq = GCSToBigQueryOperator(
         {'name': 'has_dining', 'type': 'BOOLEAN'},
         {'name': '_ingested_at', 'type': 'TIMESTAMP'},
     ],
+    **CSV_LOAD_OPTIONS,
     write_disposition='WRITE_TRUNCATE',
     gcp_conn_id='google_cloud_default',
     dag=dag,
@@ -130,6 +140,7 @@ load_rooms_to_bq = GCSToBigQueryOperator(
         {'name': 'has_kitchen', 'type': 'BOOLEAN'},
         {'name': '_ingested_at', 'type': 'TIMESTAMP'},
     ],
+    **CSV_LOAD_OPTIONS,
     write_disposition='WRITE_TRUNCATE',
     gcp_conn_id='google_cloud_default',
     dag=dag,
@@ -149,6 +160,7 @@ load_students_to_bq = GCSToBigQueryOperator(
         {'name': 'wants_private_bathroom', 'type': 'BOOLEAN'},
         {'name': '_ingested_at', 'type': 'TIMESTAMP'},
     ],
+    **CSV_LOAD_OPTIONS,
     write_disposition='WRITE_TRUNCATE',
     gcp_conn_id='google_cloud_default',
     dag=dag,
