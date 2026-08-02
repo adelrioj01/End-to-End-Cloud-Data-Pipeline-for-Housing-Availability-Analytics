@@ -89,3 +89,22 @@ cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
 ```
+
+Terraform is the source of truth for resource names. With the default
+`environment = "dev"`, it creates:
+
+- `housing_raw_dev` as the raw BigQuery dataset
+- `housing_analytics_dev` as the analytics BigQuery dataset
+- `<project_id>-housing-raw-dev` as the raw Cloud Storage bucket
+
+Copy `.env.example` to `.env` and set `GCP_PROJECT_ID` to the same
+`project_id` used by Terraform. The `BQ_DATASET_RAW`,
+`BQ_DATASET_ANALYTICS`, `BQ_LOCATION`, and `GCS_BUCKET_RAW` values must
+match the Terraform outputs. Both Airflow and dbt read these values from
+the environment; no GCP project ID is hard-coded in the dbt project.
+
+After applying Terraform, verify the effective names with:
+
+```bash
+terraform output
+```

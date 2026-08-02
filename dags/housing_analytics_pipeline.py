@@ -11,8 +11,16 @@ from airflow.utils.dates import days_ago
 # Get configuration from environment variables or Airflow variables
 GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID') or Variable.get('GCP_PROJECT_ID', default='')
 GCS_BUCKET_RAW = os.getenv('GCS_BUCKET_RAW') or Variable.get('GCS_BUCKET_RAW', default='')
-BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default='housing_raw')
-BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default='housing_analytics')
+BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default='housing_raw_dev')
+BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default='housing_analytics_dev')
+BQ_LOCATION = os.getenv('BQ_LOCATION') or Variable.get('BQ_LOCATION', default='US')
+
+DBT_ENV = {
+    'GCP_PROJECT_ID': GCP_PROJECT_ID,
+    'BQ_DATASET_RAW': BQ_DATASET_RAW,
+    'BQ_DATASET_ANALYTICS': BQ_DATASET_ANALYTICS,
+    'BQ_LOCATION': BQ_LOCATION,
+}
 
 # Project directory - get parent of dags folder
 PROJECT_DIR = str(Path(__file__).parent.parent)
@@ -150,18 +158,24 @@ load_students_to_bq = GCSToBigQueryOperator(
 dbt_compile = BashOperator(
     task_id='dbt_compile',
     bash_command=f'cd {PROJECT_DIR} && dbt compile --profiles-dir ~/.dbt',
+    env=DBT_ENV,
+    append_env=True,
     dag=dag,
 )
 
 dbt_run = BashOperator(
     task_id='dbt_run',
     bash_command=f'cd {PROJECT_DIR} && dbt run --profiles-dir ~/.dbt',
+    env=DBT_ENV,
+    append_env=True,
     dag=dag,
 )
 
 dbt_test = BashOperator(
     task_id='dbt_test',
     bash_command=f'cd {PROJECT_DIR} && dbt test --profiles-dir ~/.dbt --fail-fast',
+    env=DBT_ENV,
+    append_env=True,
     dag=dag,
 )
 

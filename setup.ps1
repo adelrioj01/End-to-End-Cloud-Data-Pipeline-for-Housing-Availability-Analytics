@@ -68,8 +68,8 @@ if (-not (Test-Path $envFile)) {
     Write-Host "Required values:" -ForegroundColor Cyan
     Write-Host "GCP_PROJECT_ID=your-gcp-project-id"
     Write-Host "GCS_BUCKET_RAW=your-raw-data-bucket"
-    Write-Host "BQ_DATASET_RAW=housing_raw"
-    Write-Host "BQ_DATASET_ANALYTICS=housing_analytics"
+    Write-Host "BQ_DATASET_RAW=housing_raw_dev"
+    Write-Host "BQ_DATASET_ANALYTICS=housing_analytics_dev"
     Write-Host "GOOGLE_APPLICATION_CREDENTIALS=C:\path\to\service-account-key.json"
 
     exit 1
@@ -80,11 +80,15 @@ Import-DotEnv -Path $envFile
 
 # Set the same defaults used by the Airflow DAG
 if ([string]::IsNullOrWhiteSpace($env:BQ_DATASET_RAW)) {
-    $env:BQ_DATASET_RAW = "housing_raw"
+    $env:BQ_DATASET_RAW = "housing_raw_dev"
 }
 
 if ([string]::IsNullOrWhiteSpace($env:BQ_DATASET_ANALYTICS)) {
-    $env:BQ_DATASET_ANALYTICS = "housing_analytics"
+    $env:BQ_DATASET_ANALYTICS = "housing_analytics_dev"
+}
+
+if ([string]::IsNullOrWhiteSpace($env:BQ_LOCATION)) {
+    $env:BQ_LOCATION = "US"
 }
 
 # Validate the variables required by the Airflow DAG
@@ -136,6 +140,7 @@ Write-Host "GCP project:          $env:GCP_PROJECT_ID"
 Write-Host "Raw GCS bucket:       $env:GCS_BUCKET_RAW"
 Write-Host "Raw BigQuery dataset: $env:BQ_DATASET_RAW"
 Write-Host "Analytics dataset:    $env:BQ_DATASET_ANALYTICS"
+Write-Host "BigQuery location:    $env:BQ_LOCATION"
 
 # 2. Install Python dependencies
 Write-Host ""
@@ -257,6 +262,7 @@ $airflowVariables = @{
     "GCS_BUCKET_RAW"       = $env:GCS_BUCKET_RAW
     "BQ_DATASET_RAW"       = $env:BQ_DATASET_RAW
     "BQ_DATASET_ANALYTICS" = $env:BQ_DATASET_ANALYTICS
+    "BQ_LOCATION"          = $env:BQ_LOCATION
 }
 
 foreach ($entry in $airflowVariables.GetEnumerator()) {

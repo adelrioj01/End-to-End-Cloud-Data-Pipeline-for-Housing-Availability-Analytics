@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: housing_raw
-    database: housing-analytics-dev
-    schema: housing_raw
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: "{{ env_var('BQ_DATASET_RAW', 'housing_raw_dev') }}"
     tables:
       - name: raw_buildings
       - name: raw_rooms
