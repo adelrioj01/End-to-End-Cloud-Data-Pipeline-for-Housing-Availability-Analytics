@@ -4,6 +4,12 @@
 .DS_Store
 Thumbs.db
 
+# Python environments and caches
+.venv/
+.airflow/
+__pycache__/
+*.py[cod]
+
 .vscode/
 .idea/
 *.swp
@@ -13,7 +19,6 @@ Thumbs.db
 .terraform/
 *.tfstate
 *.tfstate.*
-.terraform.lock.hcl
 *.tfvars
 *.tfvars.json
 
@@ -29,6 +34,7 @@ Thumbs.db
 target/
 dbt_packages/
 logs/
+.user.yml
 
 # Logs genéricos
 #######################################

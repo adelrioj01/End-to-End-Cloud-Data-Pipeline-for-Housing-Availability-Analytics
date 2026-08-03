@@ -146,10 +146,16 @@ Write-Host "BigQuery location:    $env:BQ_LOCATION"
 Write-Host ""
 Write-Host "Installing Python dependencies..." -ForegroundColor Yellow
 
-$requirementsFile = Join-Path $ProjectDir "requirements.txt"
+$airflowRequirementsFile = Join-Path $ProjectDir "requirements-airflow.txt"
+$dbtRequirementsFile = Join-Path $ProjectDir "requirements-dbt.txt"
+$airflowConstraintsUrl = "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.0/constraints-3.11.txt"
 
-if (-not (Test-Path $requirementsFile)) {
-    throw "requirements.txt was not found: $requirementsFile"
+if (-not (Test-Path $airflowRequirementsFile)) {
+    throw "Airflow requirements were not found: $airflowRequirementsFile"
+}
+
+if (-not (Test-Path $dbtRequirementsFile)) {
+    throw "dbt requirements were not found: $dbtRequirementsFile"
 }
 
 python -m pip install --upgrade pip
@@ -158,10 +164,26 @@ if ($LASTEXITCODE -ne 0) {
     throw "Failed to upgrade pip."
 }
 
-python -m pip install -r $requirementsFile
+python -m pip install `
+    -r $airflowRequirementsFile `
+    --constraint $airflowConstraintsUrl
 
 if ($LASTEXITCODE -ne 0) {
-    throw "Failed to install the Python dependencies."
+    throw "Failed to install Airflow dependencies."
+}
+
+# dbt 1.7 requires pathspec < 0.12, so install it after the constrained
+# Airflow phase. Airflow accepts the resulting shared pathspec version.
+python -m pip install -r $dbtRequirementsFile
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to install dbt dependencies."
+}
+
+python -m pip check
+
+if ($LASTEXITCODE -ne 0) {
+    throw "The installed Python dependencies are inconsistent."
 }
 
 # Confirm that the required command-line tools are available

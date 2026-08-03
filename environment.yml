@@ -1,0 +1,7 @@
+name: housing-analytics
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.9
+  - pip
+  - terraform=1.9.8

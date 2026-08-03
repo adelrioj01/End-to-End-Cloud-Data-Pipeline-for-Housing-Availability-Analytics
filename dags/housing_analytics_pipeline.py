@@ -3,17 +3,18 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from airflow import DAG
 from airflow.models import Variable
+from airflow.models.baseoperator import cross_downstream
 from airflow.providers.google.cloud.transfers.local_to_gcs import LocalFilesystemToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
-from airflow.providers.standard.operators.bash import BashOperator
+from airflow.operators.bash import BashOperator
 from airflow.utils.dates import days_ago
 
 # Get configuration from environment variables or Airflow variables
-GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID') or Variable.get('GCP_PROJECT_ID', default='')
-GCS_BUCKET_RAW = os.getenv('GCS_BUCKET_RAW') or Variable.get('GCS_BUCKET_RAW', default='')
-BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default='housing_raw_dev')
-BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default='housing_analytics_dev')
-BQ_LOCATION = os.getenv('BQ_LOCATION') or Variable.get('BQ_LOCATION', default='US')
+GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID') or Variable.get('GCP_PROJECT_ID', default_var='')
+GCS_BUCKET_RAW = os.getenv('GCS_BUCKET_RAW') or Variable.get('GCS_BUCKET_RAW', default_var='')
+BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default_var='housing_raw_dev')
+BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default_var='housing_analytics_dev')
+BQ_LOCATION = os.getenv('BQ_LOCATION') or Variable.get('BQ_LOCATION', default_var='US')
 
 DBT_ENV = {
     'GCP_PROJECT_ID': GCP_PROJECT_ID,
@@ -192,4 +193,8 @@ dbt_test = BashOperator(
 )
 
 # Set dependencies
-[upload_assignments, upload_buildings, upload_rooms, upload_students] >> [load_assignments_to_bq, load_buildings_to_bq, load_rooms_to_bq, load_students_to_bq] >> dbt_compile >> dbt_run >> dbt_test
+upload_tasks = [upload_assignments, upload_buildings, upload_rooms, upload_students]
+load_tasks = [load_assignments_to_bq, load_buildings_to_bq, load_rooms_to_bq, load_students_to_bq]
+
+cross_downstream(upload_tasks, load_tasks)
+load_tasks >> dbt_compile >> dbt_run >> dbt_test

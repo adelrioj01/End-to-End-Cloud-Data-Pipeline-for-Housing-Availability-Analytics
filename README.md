@@ -108,3 +108,23 @@ After applying Terraform, verify the effective names with:
 ```bash
 terraform output
 ```
+
+### Local Python environment
+
+Use Python 3.11.9 for the pinned Airflow 2.8 and dbt 1.7 versions.
+Airflow and dbt are installed in two phases because dbt 1.7 requires
+`pathspec < 0.12`, while the Airflow constraints pin a newer version
+during Airflow installation:
+
+```powershell
+conda create --prefix .venv python=3.11.9 pip terraform=1.9.8 -y
+conda activate .\.venv
+python -m pip install -r requirements-airflow.txt `
+  --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.0/constraints-3.11.txt
+python -m pip install -r requirements-dbt.txt
+python -m pip check
+```
+
+Airflow should be run in WSL2 or Docker for normal development and
+deployment; the native Windows environment is suitable for static DAG
+validation and dbt development.
