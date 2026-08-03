@@ -7,4 +7,5 @@ housing_analytics:
       dataset: "{{ env_var('BQ_DATASET_ANALYTICS', 'housing_analytics_dev') }}"
       threads: 4
       location: "{{ env_var('BQ_LOCATION', 'US') }}"
+      maximum_bytes_billed: 1000000000
   target: "{{ env_var('DBT_TARGET', 'dev') }}"
