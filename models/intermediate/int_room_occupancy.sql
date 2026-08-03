@@ -24,7 +24,7 @@ select
   count(distinct a.student_id) as current_occupancy,
   r.num_beds - count(distinct a.student_id) as available_beds,
   round(
-    (count(distinct a.student_id) / r.num_beds) * 100, 2
+    safe_divide(count(distinct a.student_id), r.num_beds) * 100, 2
   ) as occupancy_rate
 from rooms r
 left join buildings b on r.building_id = b.building_id

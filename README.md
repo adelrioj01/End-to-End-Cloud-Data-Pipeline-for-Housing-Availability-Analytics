@@ -128,3 +128,17 @@ python -m pip check
 Airflow should be run in WSL2 or Docker for normal development and
 deployment; the native Windows environment is suitable for static DAG
 validation and dbt development.
+
+### Data quality rules
+
+In addition to schema, uniqueness, and relationship checks, `dbt test`
+validates these business rules:
+
+- each student has at most one current assignment
+- room occupancy never exceeds capacity
+- available beds never become negative
+- every room has a positive capacity
+- assigned rooms and buildings satisfy all requested student preferences
+
+Assignment rows are currently treated as active because the source does
+not yet contain an end date or assignment status.

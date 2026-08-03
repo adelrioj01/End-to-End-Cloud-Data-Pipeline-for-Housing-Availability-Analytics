@@ -13,7 +13,7 @@ select
   sum(current_occupancy) as total_students,
   sum(available_beds) as total_available_beds,
   round(
-    (sum(current_occupancy) / sum(num_beds)) * 100, 2
+    safe_divide(sum(current_occupancy), sum(num_beds)) * 100, 2
   ) as building_occupancy_rate,
   sum(case when has_private_bathroom then 1 else 0 end) as rooms_with_private_bathroom,
   sum(case when has_kitchen then 1 else 0 end) as rooms_with_kitchen
