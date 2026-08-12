@@ -93,6 +93,7 @@ upload_students = LocalFilesystemToGCSOperator(
 # Task 2: Load data from GCS to BigQuery
 load_assignments_to_bq = GCSToBigQueryOperator(
     task_id='load_assignments_to_bigquery',
+    project_id=GCP_PROJECT_ID,
     bucket=GCS_BUCKET_RAW,
     source_objects=['raw_data/raw_assignments.csv'],
     destination_project_dataset_table=f'{GCP_PROJECT_ID}.{BQ_DATASET_RAW}.raw_assignments',
@@ -111,6 +112,7 @@ load_assignments_to_bq = GCSToBigQueryOperator(
 
 load_buildings_to_bq = GCSToBigQueryOperator(
     task_id='load_buildings_to_bigquery',
+    project_id=GCP_PROJECT_ID,
     bucket=GCS_BUCKET_RAW,
     source_objects=['raw_data/raw_buildings.csv'],
     destination_project_dataset_table=f'{GCP_PROJECT_ID}.{BQ_DATASET_RAW}.raw_buildings',
@@ -130,6 +132,7 @@ load_buildings_to_bq = GCSToBigQueryOperator(
 
 load_rooms_to_bq = GCSToBigQueryOperator(
     task_id='load_rooms_to_bigquery',
+    project_id=GCP_PROJECT_ID,
     bucket=GCS_BUCKET_RAW,
     source_objects=['raw_data/raw_rooms.csv'],
     destination_project_dataset_table=f'{GCP_PROJECT_ID}.{BQ_DATASET_RAW}.raw_rooms',
@@ -149,6 +152,7 @@ load_rooms_to_bq = GCSToBigQueryOperator(
 
 load_students_to_bq = GCSToBigQueryOperator(
     task_id='load_students_to_bigquery',
+    project_id=GCP_PROJECT_ID,
     bucket=GCS_BUCKET_RAW,
     source_objects=['raw_data/raw_students.csv'],
     destination_project_dataset_table=f'{GCP_PROJECT_ID}.{BQ_DATASET_RAW}.raw_students',
@@ -170,7 +174,7 @@ load_students_to_bq = GCSToBigQueryOperator(
 # Task 3: dbt transformations (compile, run, test)
 dbt_compile = BashOperator(
     task_id='dbt_compile',
-    bash_command=f'cd {PROJECT_DIR} && dbt compile --profiles-dir ~/.dbt',
+    bash_command=f'cd {PROJECT_DIR} && dbt compile --profiles-dir {PROJECT_DIR}',
     env=DBT_ENV,
     append_env=True,
     dag=dag,
@@ -178,7 +182,7 @@ dbt_compile = BashOperator(
 
 dbt_run = BashOperator(
     task_id='dbt_run',
-    bash_command=f'cd {PROJECT_DIR} && dbt run --profiles-dir ~/.dbt',
+    bash_command=f'cd {PROJECT_DIR} && dbt run --profiles-dir {PROJECT_DIR}',
     env=DBT_ENV,
     append_env=True,
     dag=dag,
@@ -186,7 +190,7 @@ dbt_run = BashOperator(
 
 dbt_test = BashOperator(
     task_id='dbt_test',
-    bash_command=f'cd {PROJECT_DIR} && dbt test --profiles-dir ~/.dbt --fail-fast',
+    bash_command=f'cd {PROJECT_DIR} && dbt test --profiles-dir {PROJECT_DIR} --fail-fast',
     env=DBT_ENV,
     append_env=True,
     dag=dag,

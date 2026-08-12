@@ -129,6 +129,66 @@ Airflow should be run in WSL2 or Docker for normal development and
 deployment; the native Windows environment is suitable for static DAG
 validation and dbt development.
 
+### Airflow with Docker
+
+Docker Desktop with the WSL2 backend is the recommended way to run
+Airflow locally on Windows. Before starting it:
+
+1. Start Docker Desktop and wait until it shows `Engine running`.
+2. Authenticate locally with Google Cloud Application Default Credentials:
+
+   ```powershell
+   gcloud auth application-default login
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+
+3. Copy `.env.example` to `.env` and replace all example values. On
+   Windows, set `GOOGLE_APPLICATION_CREDENTIALS_HOST` to the ADC JSON
+   file using forward slashes. The credential is mounted read-only into
+   the containers and is never copied into the Docker image.
+
+Build and start PostgreSQL, the Airflow webserver, and the scheduler:
+
+```powershell
+docker compose build
+docker compose up -d
+```
+
+Open [http://localhost:8080](http://localhost:8080) and sign in with
+username `airflow` and the value of `AIRFLOW_ADMIN_PASSWORD` from
+`.env`. The DAG is named `housing_analytics_pipeline`.
+
+Useful commands:
+
+```powershell
+# Check container health
+docker compose ps
+
+# Check that the DAG imports correctly
+docker compose exec airflow-scheduler airflow dags list-import-errors
+
+# Trigger the complete pipeline from the terminal
+docker compose exec airflow-scheduler `
+  airflow dags trigger housing_analytics_pipeline
+
+# Follow scheduler logs
+docker compose logs -f airflow-scheduler
+
+# Stop containers without deleting their data
+docker compose stop
+
+# Start the existing containers again
+docker compose start
+
+# Remove containers while preserving named volumes
+docker compose down
+```
+
+The pipeline uploads the four CSV files to Cloud Storage, replaces the
+four raw BigQuery tables, compiles and runs the eight dbt models, and
+executes all data quality tests. Do not expose port `8080` publicly;
+this Compose setup is intended for local development.
+
 ### Data quality rules
 
 In addition to schema, uniqueness, and relationship checks, `dbt test`

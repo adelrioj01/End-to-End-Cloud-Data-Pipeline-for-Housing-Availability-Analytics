@@ -1,0 +1,92 @@
+x-airflow-common: &airflow-common
+  build: .
+  env_file:
+    - .env
+  environment: &airflow-environment
+    AIRFLOW_HOME: /opt/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/project/dags
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:-housing-analytics-local-development}
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    DBT_PROFILES_DIR: /opt/airflow/project
+    GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/gcp/application_default_credentials.json
+    GOOGLE_CLOUD_PROJECT: ${GCP_PROJECT_ID}
+    PYTHONPATH: /opt/airflow/project
+  volumes:
+    - .:/opt/airflow/project
+    - airflow-logs:/opt/airflow/logs
+    - ${GOOGLE_APPLICATION_CREDENTIALS_HOST}:/opt/airflow/gcp/application_default_credentials.json:ro
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - airflow-postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    restart: "no"
+    command:
+      - bash
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username airflow \
+          --password "$${AIRFLOW_ADMIN_PASSWORD:-airflow}" \
+          --firstname Airflow \
+          --lastname Admin \
+          --role Admin \
+          --email airflow@example.com || true
+        airflow connections add google_cloud_default \
+          --conn-type google_cloud_platform || true
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname $${HOSTNAME}"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+volumes:
+  airflow-logs:
+  airflow-postgres:

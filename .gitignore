@@ -6,7 +6,9 @@ Thumbs.db
 
 # Python environments and caches
 .venv/
+.venv-wsl/
 .airflow/
+.airflow-wsl/
 __pycache__/
 *.py[cod]
 
