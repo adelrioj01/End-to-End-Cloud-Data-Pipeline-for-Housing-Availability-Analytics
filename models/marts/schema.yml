@@ -49,3 +49,19 @@ models:
       - name: has_dining
       - name: assigned_at
       - name: _ingested_at
+
+  - name: fct_assignment_activity_daily
+    columns:
+      - name: assignment_date
+        tests: [not_null, unique]
+      - name: assigned_students
+        tests: [not_null]
+      - name: assignment_count
+        tests: [not_null]
+
+  - name: fct_assignments_daily
+    columns:
+      - name: assignment_date
+        tests: [not_null, unique]
+      - name: assignments
+        tests: [not_null]

@@ -7,7 +7,7 @@ with src as (
 select
   cast(student_id as int64) as student_id,
   cast(building_id as int64) as building_id,
-  cast(room_number as int64) as room_number,
+  cast(room_number as string) as room_number,
 
   concat(cast(building_id as string), '-', cast(room_number as string)) as room_id,
 

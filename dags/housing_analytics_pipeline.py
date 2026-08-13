@@ -100,7 +100,7 @@ load_assignments_to_bq = GCSToBigQueryOperator(
     schema_fields=[
         {'name': 'student_id', 'type': 'INTEGER'},
         {'name': 'building_id', 'type': 'INTEGER'},
-        {'name': 'room_number', 'type': 'INTEGER'},
+        {'name': 'room_number', 'type': 'STRING'},
         {'name': 'assigned_at', 'type': 'TIMESTAMP'},
         {'name': '_ingested_at', 'type': 'TIMESTAMP'},
     ],
@@ -138,7 +138,7 @@ load_rooms_to_bq = GCSToBigQueryOperator(
     destination_project_dataset_table=f'{GCP_PROJECT_ID}.{BQ_DATASET_RAW}.raw_rooms',
     schema_fields=[
         {'name': 'building_id', 'type': 'INTEGER'},
-        {'name': 'room_number', 'type': 'INTEGER'},
+        {'name': 'room_number', 'type': 'STRING'},
         {'name': 'num_beds', 'type': 'INTEGER'},
         {'name': 'private_bathrooms', 'type': 'BOOLEAN'},
         {'name': 'has_kitchen', 'type': 'BOOLEAN'},
@@ -180,9 +180,34 @@ dbt_compile = BashOperator(
     dag=dag,
 )
 
-dbt_run = BashOperator(
-    task_id='dbt_run',
-    bash_command=f'cd {PROJECT_DIR} && dbt run --profiles-dir {PROJECT_DIR}',
+dbt_run_core = BashOperator(
+    task_id='dbt_run_core',
+    bash_command=(
+        f'cd {PROJECT_DIR} && dbt run --profiles-dir {PROJECT_DIR} '
+        '--select staging intermediate'
+    ),
+    env=DBT_ENV,
+    append_env=True,
+    dag=dag,
+)
+
+dbt_validate_types = BashOperator(
+    task_id='dbt_validate_types',
+    bash_command=(
+        f'cd {PROJECT_DIR} && dbt test --profiles-dir {PROJECT_DIR} '
+        '--select tag:type_validation --fail-fast'
+    ),
+    env=DBT_ENV,
+    append_env=True,
+    dag=dag,
+)
+
+dbt_run_marts = BashOperator(
+    task_id='dbt_run_marts',
+    bash_command=(
+        f'cd {PROJECT_DIR} && dbt run --profiles-dir {PROJECT_DIR} '
+        '--select marts'
+    ),
     env=DBT_ENV,
     append_env=True,
     dag=dag,
@@ -201,4 +226,4 @@ upload_tasks = [upload_assignments, upload_buildings, upload_rooms, upload_stude
 load_tasks = [load_assignments_to_bq, load_buildings_to_bq, load_rooms_to_bq, load_students_to_bq]
 
 cross_downstream(upload_tasks, load_tasks)
-load_tasks >> dbt_compile >> dbt_run >> dbt_test
+load_tasks >> dbt_compile >> dbt_run_core >> dbt_validate_types >> dbt_run_marts >> dbt_test

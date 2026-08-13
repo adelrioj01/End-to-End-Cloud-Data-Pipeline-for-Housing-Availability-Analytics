@@ -6,7 +6,7 @@ with src as (
 
 select
   cast(building_id as int64) as building_id,
-  cast(room_number as int64) as room_number,
+  cast(room_number as string) as room_number,
 
   -- Clave estable para joins
   concat(cast(building_id as string), '-', cast(room_number as string)) as room_id,

@@ -14,7 +14,7 @@ select
   wants_private_bathroom,
   room_id,
   building_id,
-  room_number,
+  cast(room_number as string) as room_number,
   num_beds,
   has_private_bathroom,
   has_kitchen,
