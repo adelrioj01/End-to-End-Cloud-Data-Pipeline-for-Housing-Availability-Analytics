@@ -1,4 +1,7 @@
 building_id,name,address,has_ac,has_dining,_ingested_at
-1,Oak Hall,123 College Ave,TRUE,TRUE,2026-08-01T00:00:00Z
-2,Maple Hall,456 Campus Rd,FALSE,TRUE,2026-08-01T00:00:00Z
-3,Pine Hall,789 University Blvd,TRUE,FALSE,2026-08-01T00:00:00Z
+1,Oak Hall,123 College Ave,TRUE,TRUE,2026-08-12T00:00:00Z
+2,Maple Hall,456 Campus Rd,FALSE,TRUE,2026-08-12T00:00:00Z
+3,Pine Hall,789 University Blvd,TRUE,FALSE,2026-08-12T00:00:00Z
+4,Cedar Hall,210 Scholar Lane,TRUE,TRUE,2026-08-12T00:00:00Z
+5,Birch Hall,85 Library Street,FALSE,FALSE,2026-08-12T00:00:00Z
+6,Willow Hall,640 Academy Drive,TRUE,TRUE,2026-08-12T00:00:00Z
