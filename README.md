@@ -31,13 +31,19 @@ modern data engineering best practices.
 - Python & SQL
 
 ## Architecture
-The pipeline follows a batch-oriented architecture:
 
-1. Raw data is ingested and stored in Cloud Storage
-2. Raw tables are loaded into BigQuery
-3. Data is transformed using dbt into staging, fact, and mart layers
-4. Final analytics tables are generated for consumption
-5. The entire workflow is orchestrated using Airflow
+![Housing analytics pipeline architecture](docs/images/architecture.svg)
+
+The batch data path is **CSV → Cloud Storage → BigQuery raw → dbt →
+BigQuery analytics marts → Looker Studio**. Airflow schedules and coordinates
+all ingestion, loading, transformation, and testing tasks. Terraform manages
+the Cloud Storage bucket and both BigQuery datasets as infrastructure as code;
+it is deliberately kept outside the daily DAG and applied only after reviewing
+the plan.
+
+dbt organizes the `housing_analytics` dataset into staging views, intermediate
+tables, and consumption-ready marts. Looker Studio connects only to the marts,
+so dashboard users do not depend on raw schemas or transformation details.
 
 ## Data Model
 The core entities of the domain are:
