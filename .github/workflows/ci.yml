@@ -42,7 +42,7 @@ jobs:
     name: Airflow DAG validation
     runs-on: ubuntu-latest
     env:
-      AIRFLOW_HOME: ${{ runner.temp }}/airflow
+      AIRFLOW_HOME: /tmp/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__UNIT_TEST_MODE: "true"
       GCP_PROJECT_ID: ci-project
