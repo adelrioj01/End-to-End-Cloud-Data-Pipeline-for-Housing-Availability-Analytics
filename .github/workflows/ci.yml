@@ -90,6 +90,7 @@ jobs:
       BQ_DATASET_ANALYTICS: housing_analytics
       BQ_LOCATION: US
       DBT_TARGET: dev
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/ci-adc.json
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -103,6 +104,18 @@ jobs:
 
       - name: Install dbt
         run: pip install -r requirements-dbt.txt
+
+      - name: Create non-production parse credentials
+        shell: bash
+        run: |
+          cat > "$GOOGLE_APPLICATION_CREDENTIALS" <<'JSON'
+          {
+            "type": "authorized_user",
+            "client_id": "ci-static-parse",
+            "client_secret": "ci-static-parse",
+            "refresh_token": "ci-static-parse"
+          }
+          JSON
 
       - name: Validate dbt project
         run: dbt parse --profiles-dir . --no-partial-parse
