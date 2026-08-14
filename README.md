@@ -64,20 +64,21 @@ The pipeline applies the following business rules:
 - Availability metrics are computed per room and building
 
 ## Data Warehouse Design
-BigQuery tables are optimized for analytics:
-- Tables are partitioned by date to support time-based queries
-- Tables are clustered by building_id and student_id
-  to optimize filtering and joins
 
-These optimizations reduce query cost and improve performance
-for common analytical workloads.
+The raw dataset contains four source-aligned tables loaded with
+`WRITE_TRUNCATE`. In the analytics dataset, dbt builds lightweight staging
+views, two intermediate tables for reusable joins and occupancy calculations,
+and four mart views for reporting. The current demonstration-scale models are
+not partitioned or clustered; those optimizations should be introduced only
+after data volume and query patterns justify them.
 
 ## Outputs
-The pipeline produces the following analytics-ready tables:
-- Daily available beds per building
-- Current student-to-room assignments
-- Rooms compatible with student preferences
-- Occupancy and utilization metrics
+The pipeline produces four analytics-ready marts:
+
+- `fct_building_availability`: capacity, occupancy, and available beds by building
+- `fct_student_assignments`: current student placements and preference details
+- `fct_assignments_daily`: compact daily assignment counts for time-series charts
+- `fct_assignment_activity_daily`: daily assignment activity with explicit metrics
 
 ## Looker Studio Dashboard
 
@@ -133,7 +134,10 @@ locate available beds, review individual placements, and monitor assignment
 activity without querying BigQuery directly.
 
 ## Reproducibility
-The entire project is fully reproducible.
+
+The infrastructure, orchestration, transformations, and tests are versioned.
+Running the complete pipeline requires a GCP project, Application Default
+Credentials, and the local environment values described below.
 
 ### Infrastructure
 ```bash
@@ -141,7 +145,10 @@ cd terraform
 cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars with your real values
 terraform init
-terraform apply
+terraform fmt -check -recursive
+terraform validate
+terraform plan
+# Review the complete plan before running terraform apply.
 ```
 
 Terraform is the source of truth for resource names. The default dataset IDs
@@ -201,6 +208,10 @@ Airflow locally on Windows. Before starting it:
    file using forward slashes. The credential is mounted read-only into
    the containers and is never copied into the Docker image.
 
+4. Generate unique local values for `AIRFLOW_ADMIN_PASSWORD` and
+   `AIRFLOW_WEBSERVER_SECRET_KEY`. Keep both only in `.env`; Docker Compose
+   refuses to start when either value is absent.
+
 Build and start PostgreSQL, the Airflow webserver, and the scheduler:
 
 ```powershell
@@ -256,3 +267,47 @@ validates these business rules:
 
 Assignment rows are currently treated as active because the source does
 not yet contain an end date or assignment status.
+
+## Automated validation
+
+Every push and pull request runs three independent GitHub Actions jobs:
+
+- Terraform formatting, initialization, and static validation
+- Python syntax plus a real import of the 13-task Airflow DAG
+- credential-free dbt project parsing against the BigQuery adapter
+
+The workflow deliberately performs no `terraform apply`, GCP writes, or dbt
+model execution. End-to-end integration is run through Airflow with local
+Application Default Credentials, while CI remains safe for pull requests.
+
+## Results and technical decisions
+
+The demonstration dataset contains 150 students, 120 current assignments,
+72 rooms, 180 beds, and 6 buildings. The resulting portfolio dashboard shows
+66.67% overall occupancy and 60 available beds. Daily aggregation keeps the
+time-series source compact, and explicit casts at the staging boundary ensure
+identifiers such as `room_number` remain strings while `assigned_at` is a
+timestamp.
+
+Key design choices include idempotent raw loads with `WRITE_TRUNCATE`, layered
+dbt models, business-rule tests before publishing marts, environment-driven
+resource names, and a reviewed Terraform plan separated from daily pipeline
+execution.
+
+## Limitations and next improvements
+
+- The CSV data is synthetic and represents a portfolio-scale batch workload.
+- Assignments have no end date or status, so every source assignment is active.
+- Raw loads replace tables rather than preserving ingestion history.
+- The local Airflow deployment is not intended to be exposed publicly.
+- Partitioning, clustering, alerts, historical snapshots, and a transactional
+  user interface are sensible future extensions when scale or product needs
+  justify them.
+
+## Project evidence
+
+The architecture diagram is included above. A capture checklist with exact
+filenames and privacy guidance is available in
+[`docs/images/README.md`](docs/images/README.md). The remaining screenshots
+should show Airflow success, BigQuery tables, dbt tests, and the completed
+Looker Studio dashboard.

@@ -50,9 +50,15 @@ jobs:
       BQ_DATASET_RAW: housing_raw
       BQ_DATASET_ANALYTICS: housing_analytics
       BQ_LOCATION: US
+      GOOGLE_APPLICATION_CREDENTIALS_HOST: /tmp/ci-adc.json
+      AIRFLOW_ADMIN_PASSWORD: ci-only-password
+      AIRFLOW_WEBSERVER_SECRET_KEY: ci-only-webserver-secret
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
 
       - name: Set up Python
         uses: actions/setup-python@v5

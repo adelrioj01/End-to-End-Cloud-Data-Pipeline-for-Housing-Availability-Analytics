@@ -12,8 +12,8 @@ from airflow.utils.dates import days_ago
 # Get configuration from environment variables or Airflow variables
 GCP_PROJECT_ID = os.getenv('GCP_PROJECT_ID') or Variable.get('GCP_PROJECT_ID', default_var='')
 GCS_BUCKET_RAW = os.getenv('GCS_BUCKET_RAW') or Variable.get('GCS_BUCKET_RAW', default_var='')
-BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default_var='housing_raw_dev')
-BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default_var='housing_analytics_dev')
+BQ_DATASET_RAW = os.getenv('BQ_DATASET_RAW') or Variable.get('BQ_DATASET_RAW', default_var='housing_raw')
+BQ_DATASET_ANALYTICS = os.getenv('BQ_DATASET_ANALYTICS') or Variable.get('BQ_DATASET_ANALYTICS', default_var='housing_analytics')
 BQ_LOCATION = os.getenv('BQ_LOCATION') or Variable.get('BQ_LOCATION', default_var='US')
 
 DBT_ENV = {

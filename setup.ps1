@@ -68,9 +68,11 @@ if (-not (Test-Path $envFile)) {
     Write-Host "Required values:" -ForegroundColor Cyan
     Write-Host "GCP_PROJECT_ID=your-gcp-project-id"
     Write-Host "GCS_BUCKET_RAW=your-raw-data-bucket"
-    Write-Host "BQ_DATASET_RAW=housing_raw_dev"
-    Write-Host "BQ_DATASET_ANALYTICS=housing_analytics_dev"
-    Write-Host "GOOGLE_APPLICATION_CREDENTIALS=C:\path\to\service-account-key.json"
+    Write-Host "BQ_DATASET_RAW=housing_raw"
+    Write-Host "BQ_DATASET_ANALYTICS=housing_analytics"
+    Write-Host "GOOGLE_APPLICATION_CREDENTIALS_HOST=C:\path\to\application_default_credentials.json"
+    Write-Host "AIRFLOW_ADMIN_PASSWORD=replace-with-a-local-password"
+    Write-Host "AIRFLOW_WEBSERVER_SECRET_KEY=replace-with-a-long-random-local-value"
 
     exit 1
 }
@@ -80,11 +82,11 @@ Import-DotEnv -Path $envFile
 
 # Set the same defaults used by the Airflow DAG
 if ([string]::IsNullOrWhiteSpace($env:BQ_DATASET_RAW)) {
-    $env:BQ_DATASET_RAW = "housing_raw_dev"
+    $env:BQ_DATASET_RAW = "housing_raw"
 }
 
 if ([string]::IsNullOrWhiteSpace($env:BQ_DATASET_ANALYTICS)) {
-    $env:BQ_DATASET_ANALYTICS = "housing_analytics_dev"
+    $env:BQ_DATASET_ANALYTICS = "housing_analytics"
 }
 
 if ([string]::IsNullOrWhiteSpace($env:BQ_LOCATION)) {
@@ -94,7 +96,9 @@ if ([string]::IsNullOrWhiteSpace($env:BQ_LOCATION)) {
 # Validate the variables required by the Airflow DAG
 $requiredVariables = @(
     "GCP_PROJECT_ID",
-    "GCS_BUCKET_RAW"
+    "GCS_BUCKET_RAW",
+    "AIRFLOW_ADMIN_PASSWORD",
+    "AIRFLOW_WEBSERVER_SECRET_KEY"
 )
 
 $missingVariables = @()
@@ -116,6 +120,10 @@ if ($missingVariables.Count -gt 0) {
 
 # Resolve the Google service-account credentials path
 $credentialsPath = $env:GOOGLE_APPLICATION_CREDENTIALS
+
+if ([string]::IsNullOrWhiteSpace($credentialsPath)) {
+    $credentialsPath = $env:GOOGLE_APPLICATION_CREDENTIALS_HOST
+}
 
 if (-not [string]::IsNullOrWhiteSpace($credentialsPath)) {
     if (-not [System.IO.Path]::IsPathRooted($credentialsPath)) {
@@ -223,6 +231,7 @@ Write-Host "Configuring Airflow..." -ForegroundColor Yellow
 
 $env:AIRFLOW_HOME = Join-Path $env:USERPROFILE "airflow"
 $env:AIRFLOW__CORE__DAGS_FOLDER = Join-Path $ProjectDir "dags"
+$env:AIRFLOW__WEBSERVER__SECRET_KEY = $env:AIRFLOW_WEBSERVER_SECRET_KEY
 
 if (-not (Test-Path $env:AIRFLOW_HOME)) {
     New-Item -ItemType Directory -Path $env:AIRFLOW_HOME -Force | Out-Null
@@ -250,29 +259,22 @@ if ($LASTEXITCODE -ne 0) {
     }
 }
 
-# 5. Create an Airflow administrator account when it does not exist
+# 5. Recreate the local Airflow administrator with the configured password
 Write-Host ""
-Write-Host "Checking the Airflow administrator account..." -ForegroundColor Yellow
+Write-Host "Refreshing the Airflow administrator account..." -ForegroundColor Yellow
 
-$airflowUsers = airflow users list 2>$null | Out-String
+airflow users delete --username airflow 2>$null
 
-if ($airflowUsers -notmatch "(?i)\badmin\b") {
-    Write-Host "Creating Airflow admin user..." -ForegroundColor Yellow
+airflow users create `
+    --username airflow `
+    --password $env:AIRFLOW_ADMIN_PASSWORD `
+    --firstname Airflow `
+    --lastname Admin `
+    --role Admin `
+    --email airflow@example.com
 
-    airflow users create `
-        --username admin `
-        --password admin `
-        --firstname Admin `
-        --lastname User `
-        --role Admin `
-        --email admin@example.com
-
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to create the Airflow administrator account."
-    }
-}
-else {
-    Write-Host "The Airflow admin user already exists." -ForegroundColor Green
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to create the Airflow administrator account."
 }
 
 # 6. Create the Airflow Variables required by the DAG
