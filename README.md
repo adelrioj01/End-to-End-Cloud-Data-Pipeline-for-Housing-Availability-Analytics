@@ -1,5 +1,7 @@
 # Cloud Data Pipeline for Housing Analytics
 
+[![CI](https://github.com/adelrioj01/End-to-End-Cloud-Data-Pipeline-for-Housing-Availability-Analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/adelrioj01/End-to-End-Cloud-Data-Pipeline-for-Housing-Availability-Analytics/actions/workflows/ci.yml)
+
 ## Problem
 A housing management system needs to understand room availability,
 student preferences, and current assignments in order to optimize

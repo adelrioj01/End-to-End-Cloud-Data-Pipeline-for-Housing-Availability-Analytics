@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: Terraform validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize providers
+        run: terraform init -backend=false -input=false
+
+      - name: Validate configuration
+        run: terraform validate -no-color
+
+  airflow:
+    name: Airflow DAG validation
+    runs-on: ubuntu-latest
+    env:
+      AIRFLOW_HOME: ${{ runner.temp }}/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__UNIT_TEST_MODE: "true"
+      GCP_PROJECT_ID: ci-project
+      GCS_BUCKET_RAW: ci-housing-raw
+      BQ_DATASET_RAW: housing_raw
+      BQ_DATASET_ANALYTICS: housing_analytics
+      BQ_LOCATION: US
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-airflow.txt
+
+      - name: Install Airflow dependencies
+        run: >-
+          pip install -r requirements-airflow.txt
+          --constraint
+          https://raw.githubusercontent.com/apache/airflow/constraints-2.8.0/constraints-3.11.txt
+
+      - name: Check DAG syntax
+        run: python -m py_compile dags/housing_analytics_pipeline.py
+
+      - name: Import and validate DAG
+        shell: bash
+        run: |
+          python - <<'PY'
+          from dags.housing_analytics_pipeline import dag
+
+          assert dag.dag_id == "housing_analytics_pipeline"
+          assert len(dag.tasks) == 13, f"Expected 13 tasks, found {len(dag.tasks)}"
+          print(f"Validated {dag.dag_id} with {len(dag.tasks)} tasks")
+          PY
+
+  dbt:
+    name: dbt project validation
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ci-project
+      BQ_DATASET_RAW: housing_raw
+      BQ_DATASET_ANALYTICS: housing_analytics
+      BQ_LOCATION: US
+      DBT_TARGET: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dbt.txt
+
+      - name: Install dbt
+        run: pip install -r requirements-dbt.txt
+
+      - name: Validate dbt project
+        run: dbt parse --profiles-dir . --no-partial-parse
