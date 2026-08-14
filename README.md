@@ -71,12 +71,58 @@ The pipeline produces the following analytics-ready tables:
 - Rooms compatible with student preferences
 - Occupancy and utilization metrics
 
-## Dashboard
-A lightweight dashboard is built on top of BigQuery to visualize:
-- Available beds over time
-- Occupancy rate per building
+## Looker Studio Dashboard
 
-(Screenshots available in the /dashboard folder)
+The analytics layer is consumed by an interactive Looker Studio report
+designed for housing managers, accommodation teams, and admissions staff.
+
+[Open the Housing Availability & Student Assignment Dashboard](https://datastudio.google.com/reporting/54160dd3-88a8-464e-9533-bbdc40896954)
+
+The report turns the BigQuery marts into three complementary views:
+
+### Executive Overview
+
+Provides an at-a-glance view of the current housing situation:
+
+- total rooms and beds
+- assigned students and available beds
+- overall occupancy rate
+- occupied versus available capacity by building
+- comparison of building occupancy rates
+
+### Building Capacity
+
+Supports capacity planning and identification of buildings that are close
+to full occupancy or still have significant availability:
+
+- available beds by building
+- total rooms and bed capacity
+- rooms with kitchens and private bathrooms
+- occupancy thresholds and detailed building-level metrics
+
+### Student Assignments
+
+Provides an operational view of student placements:
+
+- assigned students by building
+- daily assignment activity
+- student, building, room, and assignment-date details
+- housing amenities and requested student preferences
+
+The dashboard reads only from curated models in the `housing_analytics`
+dataset. Its primary sources are:
+
+- `fct_building_availability`
+- `fct_student_assignments`
+- `fct_assignments_daily`
+
+The current demonstration dataset contains 150 students, 120 assignments,
+6 buildings, 72 rooms, and 180 beds. This produces an overall occupancy rate
+of 66.67%, with 60 beds available for new assignments.
+
+The report enables users to identify capacity constraints, compare buildings,
+locate available beds, review individual placements, and monitor assignment
+activity without querying BigQuery directly.
 
 ## Reproducibility
 The entire project is fully reproducible.
@@ -185,7 +231,7 @@ docker compose down
 ```
 
 The pipeline uploads the four CSV files to Cloud Storage, replaces the
-four raw BigQuery tables, compiles and runs the eight dbt models, and
+four raw BigQuery tables, compiles and runs the ten dbt models, and
 executes all data quality tests. Do not expose port `8080` publicly;
 this Compose setup is intended for local development.
 
