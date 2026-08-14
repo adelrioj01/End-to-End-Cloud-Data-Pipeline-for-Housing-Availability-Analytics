@@ -136,12 +136,12 @@ terraform init
 terraform apply
 ```
 
-Terraform is the source of truth for resource names. With the default
-`environment = "dev"`, it creates:
+Terraform is the source of truth for resource names. The default dataset IDs
+are stable and can be overridden explicitly in `terraform.tfvars`:
 
-- `housing_raw_dev` as the raw BigQuery dataset
-- `housing_analytics_dev` as the analytics BigQuery dataset
-- `<project_id>-housing-raw-dev` as the raw Cloud Storage bucket
+- `housing_raw` as the raw BigQuery dataset
+- `housing_analytics` as the analytics BigQuery dataset
+- `<project_id>-housing-raw` as the raw Cloud Storage bucket
 
 Copy `.env.example` to `.env` and set `GCP_PROJECT_ID` to the same
 `project_id` used by Terraform. The `BQ_DATASET_RAW`,

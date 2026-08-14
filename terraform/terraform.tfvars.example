@@ -2,3 +2,8 @@ project_id  = "your-gcp-project-id"
 region      = "us-central1"
 environment = "dev"
 bq_location = "US"
+
+raw_dataset_id         = "housing_raw"
+analytics_dataset_id   = "housing_analytics"
+raw_storage_bucket_name = "your-gcp-project-id-housing-raw"
+bucket_location         = "US"
