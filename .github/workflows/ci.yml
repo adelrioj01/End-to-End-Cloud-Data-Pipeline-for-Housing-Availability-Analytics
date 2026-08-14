@@ -118,14 +118,4 @@ jobs:
           JSON
 
       - name: Validate dbt project
-        shell: bash
-        run: |
-          set +e
-          dbt parse --profiles-dir . --no-partial-parse 2>&1 | tee dbt-parse.log
-          status=${PIPESTATUS[0]}
-          set -e
-          if [ "$status" -ne 0 ]; then
-            message=$(tail -n 20 dbt-parse.log | tr '\n' ' ')
-            echo "::error title=dbt parse failed::$message"
-            exit "$status"
-          fi
+        run: dbt parse --profiles-dir . --no-partial-parse
