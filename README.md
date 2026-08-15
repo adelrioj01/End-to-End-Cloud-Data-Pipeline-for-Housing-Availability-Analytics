@@ -306,8 +306,32 @@ execution.
 
 ## Project evidence
 
-The architecture diagram is included above. A capture checklist with exact
-filenames and privacy guidance is available in
-[`docs/images/README.md`](docs/images/README.md). The remaining screenshots
-should show Airflow success, BigQuery tables, dbt tests, and the completed
-Looker Studio dashboard.
+### Published analytics dashboard
+
+The executive view exposes capacity and allocation KPIs together with
+building-level comparisons and drill-down details.
+
+![Looker Studio executive dashboard](docs/images/looker-dashboard.png)
+
+### Successful orchestration and data quality
+
+The Airflow grid shows seven successful pipeline runs and all 13 tasks in
+green. The dbt execution independently confirms that all 61 schema and
+business-rule tests pass with no warnings or errors.
+
+| Airflow DAG execution | dbt test result |
+|---|---|
+| ![Airflow DAG with all tasks successful](docs/images/airflow-dag-success.png) | ![dbt showing 61 passing tests](docs/images/dbt-tests.png) |
+
+### BigQuery warehouse layers
+
+The raw dataset contains the four source-aligned tables. The analytics dataset
+shows the complete dbt output: four staging views, two intermediate tables,
+and four reporting marts.
+
+| Raw ingestion dataset | Curated analytics dataset |
+|---|---|
+| ![BigQuery raw source tables](docs/images/bigquery-raw-tables.png) | ![BigQuery dbt analytics models](docs/images/bigquery-analytics-models.png) |
+
+Capture descriptions and privacy guidance are maintained in
+[`docs/images/README.md`](docs/images/README.md).
